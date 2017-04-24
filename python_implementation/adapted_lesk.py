@@ -140,6 +140,7 @@ def calculate_total_accuracy(n):
     accuracy_per_file.append(calculate_accuracy_for_file('line/cord2', 'line', 'line.n.18', n))
 
     print accuracy_per_file
+    print sum(accuracy_per_file)/float(len(accuracy_per_file))
 
 def calculate_accuracy_for_file(file_path, searched_word, sense_name, n):
     total_aparitions = 0
