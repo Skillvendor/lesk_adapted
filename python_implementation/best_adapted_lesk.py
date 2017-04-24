@@ -191,19 +191,96 @@ def calculate_accuracy_for_file(file_path, searched_word, sense_name, n):
 bank_sents = ['I went to the bank to deposit my money',
 'The river bank was full of dead fishes']
 
-plant_sents = ['The officers snicked a plant in thieves house',
-'The plant was no longer bearing flowers']
+print("======== adapted_lesk for nouns ===========")
+print("Context:", bank_sents[0])
+answer = adapted_lesk(bank_sents[0], 'bank', 'n')
+best_sense = answer[0][1]
+try: definition = best_sense.definition()
+except: definition = best_sense.definition
+print("Definition:", definition)
+
+
+print("\n")
+print("======== adapted_lesk nouns ===========")
+print("Context:", bank_sents[1])
+answer = adapted_lesk(bank_sents[1], 'bank', 'n')
+best_sense = answer[0][1]
+try: definition = best_sense.definition()
+except: definition = best_sense.definition
+print("Definition:", definition)
+
+
 
 take_sents = ['I take my coat and go aside',
 'Usually I take a drink in the afternoon']
 
-print("======== adapted_lesk ===========\n")
+print("\n")
+print("======== adapted_lesk verbs ===========")
+print("Context:", take_sents[0])
+answer = adapted_lesk(take_sents[0], 'take', 'v')
+best_sense = answer[0][1]
+try: definition = best_sense.definition()
+except: definition = best_sense.definition
+print("Definition:", definition)
 
-print("adapted_lesk() ...")
+print("\n")
+print("======== adapted_lesk verbs ===========")
 print("Context:", take_sents[1])
 answer = adapted_lesk(take_sents[1], 'take', 'v')
 best_sense = answer[0][1]
 try: definition = best_sense.definition()
 except: definition = best_sense.definition
 print("Definition:", definition)
+
+
+
+
+firmly_sents =  ['She take the child firmly',
+'We firmly believe in her']
+
+print("\n")
+print("======== adapted_lesk adverbs ===========")
+print("Context:", firmly_sents[0])
+answer = adapted_lesk(firmly_sents[0], 'firmly', 'r')
+best_sense = answer[0][1]
+try: definition = best_sense.definition()
+except: definition = best_sense.definition
+print("Definition:", definition)
+
+print("\n")
+print("======== adapted_lesk adverbs ===========")
+print("Context:", firmly_sents[1])
+answer = adapted_lesk(firmly_sents[1], 'firmly', 'r')
+best_sense = answer[0][1]
+try: definition = best_sense.definition()
+except: definition = best_sense.definition
+print("Definition:", definition)
+
+
+good_tents = ['She looks good',
+'Eating healthy is good for our body']
+
+print("\n")
+print("======== adapted_lesk adjectves ===========")
+print("Context:", good_tents[0])
+answer = adapted_lesk(good_tents[0], 'good', 's')
+best_sense = answer[0][1]
+try: definition = best_sense.definition()
+except: definition = best_sense.definition
+print("Definition:", definition)
+
+
+print("\n")
+print("======== adapted_lesk adjectives ===========")
+print("Context:", good_tents[1])
+answer = adapted_lesk(good_tents[1], 'good', 's')
+best_sense = answer[0][1]
+try: definition = best_sense.definition()
+except: definition = best_sense.definition
+print("Definition:", definition)
+
+
+
+
+
 # calculate_total_accuracy(10)
