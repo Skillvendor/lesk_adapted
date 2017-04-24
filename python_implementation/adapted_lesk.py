@@ -129,15 +129,27 @@ def adapted_lesk(context_sentence, ambiguous_word, \
                                     normalizescore=normalizescore)
     return best_sense
 
-def calculate_accuracy(n):
+def calculate_total_accuracy(n):
+    accuracy_per_file = []
+
+    accuracy_per_file.append(calculate_accuracy_for_file('line/division2', 'line', 'line.n.29', n))
+    accuracy_per_file.append(calculate_accuracy_for_file('line/formation2', 'line', 'line.n.01', n))
+    accuracy_per_file.append(calculate_accuracy_for_file('line/phone2', 'line', 'telephone_line.n.02', n))
+    accuracy_per_file.append(calculate_accuracy_for_file('line/product2', 'line', 'line.n.22', n))
+    accuracy_per_file.append(calculate_accuracy_for_file('line/text2', 'line', 'line.n.05', n))
+    accuracy_per_file.append(calculate_accuracy_for_file('line/cord2', 'line', 'line.n.18', n))
+
+    print accuracy_per_file
+
+def calculate_accuracy_for_file(file_path, searched_word, sense_name, n):
     total_aparitions = 0
     right_answers = 0
 
-    f = open('line/cord2', 'r')
+    f = open(file_path, 'r')
     cord_line_context = f.read().split()
     cord_line_context = [porter.stem(i) for i in cord_line_context]
     
-    indices = (i for i,word in enumerate(cord_line_context) if word=="line")
+    indices = (i for i,word in enumerate(cord_line_context) if word==searched_word)
     neighboring_words = []
     for ind in indices: neighboring_words.append(cord_line_context[ind-n-1:ind]+cord_line_context[ind:ind+n])
 
@@ -148,10 +160,10 @@ def calculate_accuracy(n):
 
         best_sense = answer[0][1]
         total_aparitions += 1
-        if best_sense.name() == 'line.n.18': right_answers += 1 
+        if best_sense.name() == sense_name: right_answers += 1 
 
-    pdb.set_trace()
-    print right_answers / total_aparitions
+    return right_answers * 1.0 / total_aparitions
+
 
 
 bank_sents = ['I went to the bank to deposit my money',
@@ -163,4 +175,4 @@ plant_sents = ['The workers at the industrial plant were overworked',
 print("======== adapted_lesk ===========\n")
 
 
-calculate_accuracy(10)
+calculate_total_accuracy(10)
