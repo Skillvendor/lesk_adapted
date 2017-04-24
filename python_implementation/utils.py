@@ -8,8 +8,8 @@ SS_PARAMETERS_TYPE_MAP = {'definition':str, 'lemma_names':list,
                          'part_holonyms':list, 'substance_holonyms':list,
                          'member_meronyms':list, 'substance_meronyms': list,
                          'part_meronyms':list, 'similar_tos':list, 'holonyms': list,
-                         'meronyms': list, 'troponyms': list, 'full_hyponyms':list, 
-                         'full_hypernyms': list}
+                         'meronyms': list, 'entailments': list, 'full_hyponyms':list,
+                         'full_hypernyms': list, 'attributes': list, 'topic_domains': list, 'similar_tos': list}
 
 def remove_tags(text):
   import re

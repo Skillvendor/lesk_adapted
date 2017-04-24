@@ -19,9 +19,13 @@ def score(string1, string2):
             break
         splitted_answer = answer.split()
         answer_len = len(splitted_answer)
-        string1 = string1.replace(answer, "")
-        string2 = string2.replace(answer, "")
-        answer_score += answer_len * answer_len
+        if splitted_answer[0] in EN_STOPWORDS and splitted_answer[answer_len - 1] in EN_STOPWORDS:
+            string1 = string1.replace(answer[0], "")
+            string2 = string2.replace(answer[0], "")
+        else:
+            string1 = string1.replace(answer, "")
+            string2 = string2.replace(answer, "")
+            answer_score += answer_len * answer_len
 
     return answer_score
 
@@ -59,7 +63,8 @@ def compare_overlaps(context, synsets_signatures):
                         context_words = context_gloss.translate({ord(i):None for i in '!@#$?.,;()'}).split()
                         context_words = [i for i in context_words if i not in EN_STOPWORDS]
                         context_words = ' '.join([porter.stem(i) for i in context_words])
-
+                        if gloss_words == context_words:
+                            continue
                         overlaps = score(gloss_words, context_words)
                         overlaplen_synsets.append((overlaps, ss, gloss_words, context_words))
 
@@ -72,39 +77,56 @@ def compare_overlaps(context, synsets_signatures):
 def simple_signature(ambiguous_word, pos=None):
     synsets_signatures = {}
     for ss in wn.synsets(ambiguous_word):
-
-        if str(ss.pos()) != pos:
+        if pos and str(ss.pos()) != pos:
             continue
 
         signature = []
 
         # Includes definition
         ss_definition = synset_properties(ss, 'definition')
-        signature.append(ss_definition)
+        signature.append(ss_definition.translate({ord(i):None for i in '!@#$?.,;()'}))
 
         # Include holonyms
-        ss_mem_holonyms = synset_properties(ss, 'member_holonyms')
-        ss_part_holonyms = synset_properties(ss, 'part_holonyms')
-        ss_sub_holonyms = synset_properties(ss, 'substance_holonyms')
-        ss_all = ss_mem_holonyms + ss_part_holonyms + ss_sub_holonyms
+        if pos == None or pos == 'n':
+            ss_mem_holonyms = synset_properties(ss, 'member_holonyms')
+            ss_part_holonyms = synset_properties(ss, 'part_holonyms')
+            ss_sub_holonyms = synset_properties(ss, 'substance_holonyms')
+            ss_all = ss_mem_holonyms + ss_part_holonyms + ss_sub_holonyms
 
-        if len(ss_all) > 0:
-            signature += [' '.join(synset_properties(i, 'definition') for i in ss_all)]
-        # # Includes meronyms
-        ss_mem_meronyms = synset_properties(ss, 'member_meronyms')
-        ss_part_meronyms = synset_properties(ss, 'part_meronyms')
-        ss_sub_meronyms = synset_properties(ss, 'substance_meronyms')
-        ss_all = ss_mem_meronyms + ss_part_meronyms + ss_sub_meronyms
+            if len(ss_all) > 0:
+                signature += [' '.join(synset_properties(i, 'definition').translate({ord(i):None for i in '!@#$?.,;()'}) for i in ss_all)]
+            # Includes meronyms
+            ss_mem_meronyms = synset_properties(ss, 'member_meronyms')
+            ss_part_meronyms = synset_properties(ss, 'part_meronyms')
+            ss_sub_meronyms = synset_properties(ss, 'substance_meronyms')
+            ss_all = ss_mem_meronyms + ss_part_meronyms + ss_sub_meronyms
 
-        if len(ss_all) > 0:
-            signature += [' '.join(synset_properties(i, 'definition') for i in ss_all)]
+            if len(ss_all) > 0:
+                signature += [' '.join(synset_properties(i, 'definition').translate({ord(i):None for i in '!@#$?.,;()'}) for i in ss_all)]
 
-        ss_hyponyms = synset_properties(ss, 'hyponyms')
-        if len(ss_hyponyms) > 0:
-            signature += [' '.join(synset_properties(i, 'definition') for i in ss_hyponyms)]
-        ss_hypernyms = synset_properties(ss, 'hypernyms')
-        if len(ss_hypernyms) > 0:
-            signature += [' '.join(synset_properties(i, 'definition') for i in ss_hypernyms)]
+            ss_hyponyms = synset_properties(ss, 'hyponyms')
+            if len(ss_hyponyms) > 0:
+                signature += [' '.join(synset_properties(i, 'definition').translate({ord(i):None for i in '!@#$?.,;()'}) for i in ss_hyponyms)]
+        if pos == None or pos == 'v' or pos == 's':
+            ss_hypernyms = synset_properties(ss, 'hypernyms')
+            if len(ss_hypernyms) > 0:
+                signature += [' '.join(synset_properties(i, 'definition').translate({ord(i):None for i in '!@#$?.,;()'}) for i in ss_hypernyms)]
+        if pos == None or pos == 'v':
+            ss_entailments = synset_properties(ss, 'entailments')
+            if len(ss_entailments) > 0:
+                signature += [' '.join(synset_properties(i, 'definition').translate({ord(i):None for i in '!@#$?.,;()'}) for i in ss_entailments)]
+        if pos == None or pos == 's':
+            ss_attributes = synset_properties(ss, 'attributes')
+            ss_similar_tos = synset_properties(ss, 'similar_tos')
+            if len(ss_attributes) > 0:
+                signature += [' '.join(synset_properties(i, 'definition').translate({ord(i):None for i in '!@#$?.,;()'}) for i in ss_attributes)]
+            if len(ss_similar_tos) > 0:
+                signature += [' '.join(synset_properties(i, 'definition').translate({ord(i):None for i in '!@#$?.,;()'}) for i in ss_similar_tos)]
+        if pos == None or pos == 'r':
+            ss_topics = synset_properties(ss, 'topic_domains')
+            if len(ss_topics) > 0:
+                signature += [' '.join(synset_properties(i, 'definition').translate({ord(i):None for i in '!@#$?.,;()'}) for i in ss_topics)]
+
 
         synsets_signatures[ss] = signature
 
@@ -124,7 +146,7 @@ def adapted_lesk(context_sentence, ambiguous_word, pos=None):
     for word in context_sentence.split():
         if word == ambiguous_word:
             continue
-        sign = simple_signature(word, pos)
+        sign = simple_signature(word)
         context_sign.append(sign)
     best_sense = compare_overlaps(context_sign, word_sign)
     return best_sense
@@ -156,8 +178,7 @@ def calculate_accuracy_for_file(file_path, searched_word, sense_name, n):
 
     for neighbours in neighboring_words:
         sentence = ' '.join(neighbours)
-        answer = adapted_lesk(sentence,'line','n', True, \
-                     nbest=True, keepscore=True)
+        answer = adapted_lesk(sentence,'line','n')
 
         best_sense = answer[0][1]
         total_aparitions += 1
@@ -166,22 +187,23 @@ def calculate_accuracy_for_file(file_path, searched_word, sense_name, n):
     return right_answers * 1.0 / total_aparitions
 
 
+
 bank_sents = ['I went to the bank to deposit my money',
 'The river bank was full of dead fishes']
 
-plant_sents = ['The workers at the industrial plant were overworked',
+plant_sents = ['The officers snicked a plant in thieves house',
 'The plant was no longer bearing flowers']
+
+take_sents = ['I take my coat and go aside',
+'Usually I take a drink in the afternoon']
 
 print("======== adapted_lesk ===========\n")
 
-
-
 print("adapted_lesk() ...")
-print("Context:", bank_sents[0])
-answer = adapted_lesk(bank_sents[0],'bank','n')
+print("Context:", take_sents[1])
+answer = adapted_lesk(take_sents[1], 'take', 'v')
 best_sense = answer[0][1]
 try: definition = best_sense.definition()
 except: definition = best_sense.definition
 print("Definition:", definition)
-
 # calculate_total_accuracy(10)
