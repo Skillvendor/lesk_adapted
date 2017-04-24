@@ -20,8 +20,6 @@ def compare_overlaps(context, synsets_signatures, \
     # Rank synsets from highest to lowest overlap.
     ranked_synsets = sorted(overlaplen_synsets, reverse=True)
 
-    pdb.set_trace()
-
     # Normalize scores such that it's between 0 to 1.
     if normalizescore:
         total = float(sum(i[0] for i in ranked_synsets))
@@ -131,6 +129,31 @@ def adapted_lesk(context_sentence, ambiguous_word, \
                                     normalizescore=normalizescore)
     return best_sense
 
+def calculate_accuracy(n):
+    total_aparitions = 0
+    right_answers = 0
+
+    f = open('line/cord2', 'r')
+    cord_line_context = f.read().split()
+    cord_line_context = [porter.stem(i) for i in cord_line_context]
+    
+    indices = (i for i,word in enumerate(cord_line_context) if word=="line")
+    neighboring_words = []
+    for ind in indices: neighboring_words.append(cord_line_context[ind-n-1:ind]+cord_line_context[ind:ind+n])
+
+    for neighbours in neighboring_words:
+        sentence = ' '.join(neighbours)
+        answer = adapted_lesk(sentence,'line','n', True, \
+                     nbest=True, keepscore=True)
+
+        best_sense = answer[0][1]
+        total_aparitions += 1
+        if best_sense.name() == 'line.n.18': right_answers += 1 
+
+    pdb.set_trace()
+    print right_answers / total_aparitions
+
+
 bank_sents = ['I went to the bank to deposit my money',
 'The river bank was full of dead fishes']
 
@@ -139,22 +162,5 @@ plant_sents = ['The workers at the industrial plant were overworked',
 
 print("======== adapted_lesk ===========\n")
 
-print("adapted_lesk() ...")
-print("Context:", bank_sents[0])
-answer = adapted_lesk(bank_sents[0],'bank')
-print("Sense:", answer)
-try: definition = answer.definition()
-except: definition = answer.definition
-print("Definition:", definition)
-print("")
 
-print("adapted_lesk() with pos, stem, nbest and scores.")
-print("Context:", bank_sents[0])
-answer = adapted_lesk(bank_sents[0],'bank','n', True, \
-                     nbest=True, keepscore=True)
-print("Senses ranked by #overlaps:", answer)
-best_sense = answer[0][1]
-try: definition = best_sense.definition()
-except: definition = best_sense.definition
-print("Definition:", definition)
-print
+calculate_accuracy(10)
